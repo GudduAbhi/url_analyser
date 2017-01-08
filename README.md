@@ -1,4 +1,4 @@
-# url_analyser
+# url_analyzer
 
 In order to make our build point to system-wide sqlite3 (& to rectify the common build problem),
 we need to do the following (I'm on my ubuntu machine)
