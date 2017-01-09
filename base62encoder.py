@@ -9,6 +9,7 @@ def toBase62(num, b = 62):
         return 0
     base = string.ascii_lowercase + string.ascii_uppercase + string.digits
     r = num % b
+    print('r',r)
     res = base[r];
     q = floor(num / b)
     while q:
