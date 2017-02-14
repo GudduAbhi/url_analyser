@@ -1,51 +1,28 @@
 #!bin/bash/env python3
 import sqlite3
+from db_schema import UserInfo,URLInfo,UserURLInfo,start_db
 import base62encoder
-from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship,sessionmaker,backref
+import http_handler
 from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
 
-class UserInfo(Base):
-    __tablename__ = 'userInfo'
-    user_id = Column(Integer, primary_key=True)
-    name = Column(String(250))
-    password = Column(String(8), nullable=False)
-    url_info = relationship('URLInfo', secondary='user_url_info')
-
-class URLInfo(Base):
-    __tablename__ = 'urlInfo'
-    url_id = Column(Integer, primary_key=True)
-    original_URL = Column(String(100))
-    shortened_URL = Column(String(100),default='')
-    generic_counter = Column(Integer,default=0)
-    twitter_counter = Column(Integer,default=0)
-    reddit_counter = Column(Integer,default=0)
-    user_info = relationship('UserInfo',secondary='user_url_info')
-
-class UserURLInfo(Base):
-    __tablename__ = 'user_url_info'
-    user_id = Column(Integer, ForeignKey('userInfo.user_id'), primary_key=True)
-    url_id = Column(Integer, ForeignKey('urlInfo.url_id'), primary_key=True)
+#Base = declarative_base()
 
 if __name__ == "__main__":
-    session = sessionmaker()
-    engine = create_engine('sqlite:///')
-    session.configure(bind=engine)
-    Base.metadata.create_all(engine)
-
+    #engine = create_engine('sqlite:///test.db')
+    session = http_handler.start_db()
+    short_url = ''
     user_name = input('Enter a username:')
-    user_password = input('Enter password for {} :'.format(user_name))
     user_url = input('Enter URL to shorten:')
-
     s = session()
-    a_user = UserInfo(name=user_name,password=user_password)
-    a_url = URLInfo(original_URL=user_url)
-    s.add(a_user)
-    s.add(a_url)
-    s.commit()
-    print (a_user.user_id,a_url.url_id)
-    print('URLInfo====>',a_url.url_id)
+    one_more = register_info_into_db(s,user_name,user_url)
+    while one_more.lower() != 'no':
+        if one_more.lower() == 'yes':
+            user_name = input('Enter a username:')
+            user_url = input('Enter URL to shorten:')
+            http_handler.register_info_into_db(s,user_name,user_url)
+        else:
+            print('Exiting...')
+            break
     s.close()
